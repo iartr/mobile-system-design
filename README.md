@@ -1,520 +1,466 @@
-# A Simple Framework For Mobile System Design Interviews (work in progress)
-Below is a simple framework for Mobile System Design interviews. As an example, we are going to use the "Design Twitter Feed" question. The proposed solution is far from being perfect but it is not the point of a system design interview round: no one expects you to build a robust system in just 30 min - the interviewer is mostly looking for specific "signals" from your thought process and communication. Everything you say or do should showcase your strengths and help the interviewer to evaluate you as a candidate.  
-  
-Join the ["Mobile System Design"](https://discord.gg/AWDNrvqban) Discord server for general discussions and feedback.
+# Фреймворк для прохождения Mobile System Design Interview
+Ниже приведен фреймворк для прохождения собеседований по проектированию систем с упором на мобильную разработку. В качестве примера будет проектирована лента твиттера. Предлагаемое решение далеко от совершенства, но не в этом суть собеседования по проектированию систем: никто не ожидает, что вы создадите надежную систему всего за 30 минут - интервьюер в основном ищет конкретные “сигналы” из вашего мыслительного процесса и коммуникаций, которые помогают оценить вас как кандидата. На что интервьюер может обращать внимание, будет рассмотрено в каждой главе.
 
-<div align="center">
-  
-[<img height="60" alt="discord" src="https://user-images.githubusercontent.com/786644/91370247-cf4cea80-e7db-11ea-8330-dc29c0fe8969.png">](https://discord.gg/AWDNrvqban)
-  
-</div>
+## Зачем этот форк?
+Мне не нравится некоторые куски оригинального репозитория, а именно его конечный результат — спроектированные диаграммы. Я считаю их некачественными. Неясно, зачем вводятся те или иные компоненты и как они связаны. Кроме того, некоторые компоненты излишни или вообще не нужны (например, DI Graph, Coordinator).
 
-## Disclaimer
-The framework was heavily inspired by the similar "Scalable Backend Design" articles. Learning the framework does not guarantee passing the interview. The structure of the interview process depends on the personal style of the interviewer. The dialog is really important - make sure you understand what the interviewer is looking for. Make no assumptions and ask clarifying questions.  
 
-**This guide does not reflect the interviewing policies from Google (or any other company).**
+Доклад с мобиуса “Как пройти архитектурную секцию собеседования” рассматривает лишь проектирование конкретного модуля конкретной фичи с заранее предлагаемый MV* паттерном: почему так? Как устроены остальные фичи? Как устроена связь между фичами? Как устроена многомодульность? Как пройти секцию, если тебя просят спроектировать библиотеку?
 
-## Interview Process (45–60 min)
-- 2–5 min - acquaintances
-- 5 min - defining the task and gathering requirements
-- 10 min - high-level discussion
-- 20-30 min - detailed discussion
-- 5 min - questions to the interviewer
+Я перевел оригинальный фреймворк и дополнил его фича-модульной и чистой архитектурой, а также рядом своих мыслей по прохождению данной секции.
 
-## Acquaintances
-Your interviewer tells you about themselves and you tell them about yourself. It's better to keep it simple and short. For example, _"My name is Alex, I've been working on iOS/Android since 2010 - mostly on frameworks and libraries. For the past 2.5 years, I've been leading a team on an XYZ project: my responsibilities include system design, planning and technical mentoring."_ The only purpose of the introduction is to break the ice and provide a gist of your background. The more time you spend on this, the less time you will have for the actual interview.
+Больше контента про мобильную разработку и IT  можно найти в моем [Telegram блоге](https://t.me/artrblog).
 
-## Defining The Task
-The interviewer defines the task. For example: _"Design Twitter Feed"_.  Your first step is to figure out the scope of the task:
-- **Client-side only** -  just a client-app: you have the backend and API available.
-- **Client-side + API**  -  likely choice for most interviews: you need to design a client app and API.
-- **Client-side + API + Back-end** -  less likely choice since most mobile engineers would not have a proper backend experience. If the interviewer asks server-side questions - let them know that you're most comfortable with the client-side and don't have hands-on experience with backend infrastructure. It's better to be honest than trying to fake your knowledge. If they still persist - let them know that everything you know comes from books, YouTube videos, and blog posts.
+## Дисклеймер
+Знание данного фреймворка не гарантирует прохождение интервью. Структура процесса собеседования зависит от личного стиля интервьюера. Не делайте предположений на собеседовании и задавайте уточняющие вопросы. Убедитесь, что вы понимаете, что хочет услышать интервьюер.
 
-## Gathering Requirements
-Task requirements can be split into **functional**, **non-functional** and **out of scope**.  We'll define them in the scope of "Design Twitter Feed" task.
-### Functional requirements
-Think about 3–5 features that would bring _the biggest value to the business_.
-- Users should be able to scroll through an infinite list of tweets.
-- Users should be able to like a tweet.
-- Users should be able to open a tweet and see comments (read-only).
+## Процесс интервью (45–60 минут)
+- 2–5 минут — знакомство;
+- 5 минут — постановка задачи и сбор требований;
+- 10-15 минут — проектирование и обсуждение высокоуровневой архитектуры;
+- 20-30 минут — погружение в детали;
+- 5 минут — ваши вопросы интервьюеру.
 
-### Non-functional requirements
-Not immediately visible to a user but plays an important role for the product in general.
-- Offline support.
-- Real-time notifications.
-- Optimal bandwidth and CPU/Battery usage.
+## Знакомство
+Интервьюер рассказывает о себе, затем вы. На этой секции лучше построить рассказ о себе коротким, четким и простым. Например: "Я Артур, мобильный разработчик во ВКонтакте, разрабатываю как продуктовые треки, так и инструменты для разработчиков. Последние полгода был фиче-лидом команды мультиаккаунта: в мои обязанности входило проектирование системы, планирования, технический мониторинг и непосредственная разработка".
+Единственная цель знакомства на данном интервью — расслабить вас и кратко рассказать о вашем коммерческом опыте. Чем больше времени вы потратите на это, тем меньше времени у вас останется на само собеседование.
 
-### Out of scope
-Features which will be excluded from the task but would still be important in a real project.
-- Login/Authentication.
-- Tweet sending.
-- Followers/Retweets.
-- Analytics.
+## Постановка задачи
+Интервьюер ставит задачу, например: "*Спроектируй Twitter*".  Ваш первый шаг - определить масштаб задачи:
+- **Только клиенсткое приложение**: есть бэкенд и известен API.
+- **Клиенсткое приложение + API** : встречается чаще всего, вам нужно разработать клиентское приложение и API.
+- **Клиенсткое приложение + API + Backend**: менее вероятный выбор, поскольку у большинства мобильных инженеров не было надлежащего опыта работы с Backend'ом.
 
-### Providing the "signal"
-System design questions are made ambiguous. The interviewer is more interested in seeing your thought process than the actual solution you produce:
-- What assumptions did you make and how did you state them?
-- What features did you choose?
-- What clarifying questions did you ask?
-- What concerns and trade-offs did you mention?
+## Сбор требований
+Требования к задаче разделяются на **функциональные**, **нефункциональные** и **требования, выходящие за рамки задачи**.  Обозначим требования для задачи проектирования Twitter'a:
+### Функциональные требования:
+Подумайте о 3-5 функций, которые _принесут наибольшую ценность бизнесу_.
+- пользователи должны иметь возможность прокручивать бесконечный список твитов;
+- пользователи должны иметь возможность лайкнуть твит;
+- пользователи должны иметь возможность открыть конкретный твит и посмотреть комментарии (только чтение).
 
-Your best bet is to ask many questions and cover as much ground as possible. Make it clear that you're starting with the BFS approach and ask them which feature or component they want to dig in. Some interviewers would let you choose which topics you want to discuss :  pick something you know best.
+### Нефункциональные требования
+Не сразу видны пользователю, но играет важную роль для продукта в целом.
+- оффлайн режим;
+- real-time обновления;
+- оптимальное использование мощностей процессора, батареи и интернет-трафика.
 
-## Clarifying Questions
-Here are some of the questions you might ask during the task clarification step
-- **Do we need to support Emerging Markets?**  
-Publishing in a developing country brings additional challenges. The app size should be as small as possible due to the widespread use of low-end devices and higher cost of cellular traffic. The app itself should limit the number and the frequency of network requests and heavily rely on caching.
-- **What number of users do we expect?**  
-This seems like an odd question for a mobile engineer but it can be very important: a large number of clients results in a higher back-end load  -  if you don't design your API right , you can easily initiate a DDoS attack on your own servers. Make sure to discuss an Exponential Backoff and API Rate-Limiting with your interviewer.
-- **How big is the engineering team?**  
-This question might make sense for senior candidates. Building a product with a smaller team (2–4 engineers) is very different from building it with a larger team (20–100 engineers). The major concern is project structure and modularization. You need to design your system in a way that allows multiple people to work on it without stepping on each other's toes.
+### Выходит за рамки
+Функции, которые будут исключены из задачи, но все равно будут важны в реальном проекте.
+- авторизация;
+- отправка твита;
+- подписки, ретвиты;
+- аналитика;
+- навигация.
 
-## High-Level Diagram
-Once your interviewer is satisfied with the clarification step and your choice for the system requirements  - you should ask if they want to see a high-level diagram. Below is a possible solution for the "Twitter Feed" question.
-![High-level Diagram](/images/twitter-feed-high-level-diagram.svg)
+### Советы
+Вопросы о проектировании систем обычно двусмысленные. Интервьюеру больше интересно увидеть ваш мыслительный процесс, чем реальное решение, которое вы предлагаете:
+- какие предположения о работе системы вы сделали и как вы их сформулировали?
+- какие функции вы выбрали?
+- какие уточняющие вопросы задали?
+- о каких потенциальных проблемах и компромиссах вы упомянули?
 
-### Server-side components:
-- **Backend**  
-Represents the whole server-sider infrastructure. Most likely, your interviewer won't be interested in discussing it.
-- **Push Provider**  
-Represents the Mobile Push Provider infrastructure. Receives push payloads from the Backend and delivers them to clients.
-- **CDN (Content Delivery Network)**  
-Responsible for delivering static content to clients.
-### Client-side components:
-- **API Service**  
-Abstracts client-server communications from the rest of the system.
-- **Persistence**  
-A single source of truth. The data your system receives gets persisted on the disk first and then propagated to other components.
-- **Repository**  
-A mediator component between API Service and Persistence.
-- **Tweet Feed Flow**  
-Represents a set of components responsible for displaying an infinite scrollable list of tweets.
-- **Tweet Details Flow**  
-Represents a set of components responsible for displaying a single tweet's details.
-- **DI Graph**  
-Dependency injection graph. _TBD_.
-- **Image Loader**  
-Responsible for loading and caching static images. Usually represented by a 3rd-party library.
-- **Coordinator**  
-Organizes flow logic between Tweet Feed and Tweet Details components. Helps decoupling components of the system from each other.
-- **App Module**  
-An executable part of the system which "glues" components together.
+Лучше всего задавать много вопросов и охватить как можно больше информации. Дайте понять, что вы начинаете копать в ширь, и спросите, в какую тему интервьюер хотел бы погрузиться больше.
 
-### Providing the "signal"
-The interviewer might be looking for the following signals:
-- The candidate can present the "big picture" without overloading it with unnecessary implementation details.
-- The candidate can identify the major building blocks of the system and how they communicate with each other.
-- The candidate has app modularity in mind and is capable of thinking in the scope of the entire team and not limiting themselves as a single contributor (this might be more important for senior candidates).
+## Уточняющие вопросы и дополнительный контекст
+Вот некоторые из вопросов, которые можно задать на этапе разъяснения задачи:
+- **нужно ли нам поддерживать развивающиеся рынки?** Публикация в развивающейся стране сопряжена с дополнительными трудностями. Размер приложения должен быть как можно меньше из-за широкого использования недорогих устройств и более высокой стоимости сотового трафика. Само приложение должно ограничивать количество и частоту сетевых запросов и в значительной степени полагаться на кэширование.
+- **какое количество пользователей ожидается?** Это кажется странным вопросом для мобильного инженера, но он может быть очень важным: большое количество клиентов приводит к более высокой нагрузке на серверную часть - если вы неправильно разработаете свой API, вы можете легко инициировать DDoS-атаку на свои собственные серверы. Обязательно обсудите с вашим интервьюером подходы по exponential backoff и API rate-limiting.
+- **какой размер команды ожидается?** Этот вопрос может иметь смысл для кандидатов уровня senior и выше. Создание продукта небольшой командой (2-4 инженера) сильно отличается от создания его более крупной командой (20-100 инженеров). Основная проблема заключается в структуре проекта и модульности. Вам нужно спроектировать свою систему таким образом, чтобы над ней могли комфортно работать много человек.
 
-### Frequently Asked Questions
-#### Why using a high-level diagram is necessary? Can I skip it altogether or draw a detailed diagram right away?
-A high-level diagram is by no means necessary - you can take any other approach which seems more appropriate for a specific interview case. However, there are some advantages in starting with a high-level approach:
-- **Time management** - drawing a 30,000 feet view is quick and brings immediate topics for further discussion.
-- **Modularity** - each high-level component can be potentially isolated in a separate module to allow a team of engineers to work on the project simultaneity without stepping on each other toes.
-- **Best practices** - this approach is wildly used for the backend system design and closely resembles the [C4 model for visualising software architecture](https://c4model.com/).  
+## Высокоуровневая диаграмма
+По окончании этапа сбора и уточнения требований спросите, нужно ли спроектировать высокоуровневую диаграмму компонентов. Вот как она может выглядеть:
+![High-level Diagram](images/twitter-feed-high-level-diagram2.png)
 
-_Still not sure?_ Ask your interviewer if they want you to draw a high-level diagram or skip it and jump to some concrete components.
+### Анатомия фича-модульной архитектуры:
+Классический вариант проектирования приложения — фича-модульная архитектура, рассмотрим ее компоненты:
+- **Feature API**: публичный интерфейс взаимодействия с фичей, например UseCase, возвращающих список всех твитов; router, позволяющий открывать твит по его id. Важно: API не навязывает наружу никакие фреймворки, DI, MV* паттерны, в идеале без платформенных зависимостей для возможности интеграции кроссплатформенных решений;
+- **Feature Deps**: зависимости фичи на другие фичи, например, на UseCase, позволяющий лайкнуть твит по его id. Важно: фичи не связаны напрямую, фича подключает только публичный интерфейс другой фичи. Имплементации фичей подключается только в Application. В противном случае мы нарвемся на циклические зависимости, невозможность подмены реализации, ухудшение скорости сборки;
+- **Feature State**: UI state фичи — MVx паттерны, чистые функции, сохранение состояния;
+- **Feature Business logic**: скорее всего чистая архитектура, UseCases, Interactors.
 
-## Deep Dive: Tweet Feed Flow
-After a high-level discussion, your interviewer might steer the conversation towards some specific component of the system. Let's assume it was "Tweet Feed Flow". Things you might want to talk about:
-- **Architecture patterns**: MVP, MVVM, MVI, etc. MVC is considered a poor choice these days. It's better to select a well known pattern since it makes it easier to onboard new hires (compared to some less known home-grown approaches).
-- **Pagination**: essential for an infinite scroll functionality. For more details see Pagination.
-- **Dependency injection**: helps building an isolated and testable module.
-- **Image Loading**: low-res vs full-res image loading, scrolling performance, etc.
+#### Дисклеймер про чистую архитектуру
+Все понимают чистую архитектуру по-разному: 5 разных разработчиков приведут 5 разных реализаций, поэтому клин - это маяк и ориентир для разработчиков, нам важно взять принципы чистой архитектуры: независимая бизнес-логика (domain слой), и presentation и data слой зависят от нее, тем самым мы получаем, в идеале, независимость от UI фреймворка, от баз данных, получаем тестируемость, переиспользуемость, задел на кроссплатфрому. А конкретная реализация клина зависит от компании или даже команды.
 
-![Details Diagram](/images/tweet-details.svg)
-### Components
-- **Feed API Service** - abstracts Twitter Feed API client: provides the functionality for requesting paginated data from the backend. Injected via DI-graph.
-- **Feed Persistence** - abstract cached paginated data storage. Injected via DI-graph.
-- **Remote Mediator** - triggers fetching the next/prev page of data. Redirects the newly fetched paged response into a persistence layer.
-- **Feed Repository** - consolidates remote and cached responses into a Pager object through Remote Mediator.
-- **Pager** - trigger data fetching from the Remote Mediator and exposes an observable stream of paged data to UI.
-- **"Tweet Like" and "Tweet Details" use cases** - provide delegated implementation for "Like" and "Show Details" operations. Injected via DI-graph.
-- **Image Loader** - abstracts image loading from the image loading library. Injected via DI-graph.
+Остальные компоненты архитектуры:
+- **Feature Data**: вся грязь, походы на бэкенд, в хранилища и т.д.
+- **Core modules**: ряд ключевых модулей, не разделяемых api/impl: авторизация, навигация, аналитика, слой работы с бэкендом и прочее.
+- **Backend**: rest / graphql / websockets / sse / etc...
+- **App**: точка входа в приложение, подключает в себя все модули, настройвает core модули, показывает первую UI фичу приложения.
 
-### Providing the "signal"
-The interviewer might be looking for the following signals:
-- The candidate is familiar with most common MVx patterns.
-- The candidate achieves a clear separation between business logic and UI.
-- The candidate is familiar with dependency injection methods.
-- The candidate is capable of designing self-contained isolated modules.
+**Объяснение иерархии модулей** и их интеграцию с DI можно найти по [ссылке](https://youtu.be/VIg5LN08M1E?si=YVO2jyynkb_y7gwK).
 
-### Frequently Asked Questions
 
-#### How much detail should I provide in the deep-dive section?"
-There's no rule of thumb here. Work closely with the interviewer: ask them if you need to go deeper or move on to the next topic. If you have an in-person/video interview - watch their facial expressions. For example, if you see that the interviewer wants to interrupt you - stop talking and ask if they have any questions. The whole point is to work together - that provides a good signal for you as a team player/collaborator.
+### На что обращают внимание
+- кандидат может представить “общую картину”, не перегружая ее ненужными деталями реализации;
+- кандидат может определить основные строительные блоки системы и то, как они взаимодействуют друг с другом;
+- кандидат учитывает модульность приложения и способен мыслить в рамках всей команды, а не ограничивать себя как единственного участника.
 
-#### Why didn't you mention specific classes (like `RecyclerView`/`UICollectionView`) and vendors (like Room, CoreDate, Realm, etc)?
-- To make the guide stable and platform-agnostic: the libraries and the frameworks are constantly evolving - picking up a specific vendor can only be relevant for a short amount of time. Using an abstraction is more robust since you only concentrate on the functionality it provides without digging too much into the implementation details.
-- Vendor selection is biased and depends on personal experience and current trends.
-- Big tech companies (like FAANG) might not care much about vendors since they build their custom proprietary stacks.
-- There are tons of implementation-specific details all over the Internet already.
+#### Зачем рисовать высокоуровневую диаграмму? Можно пропустить и рисовать сразу детализированную?
+Рисование высокоуровневой диаграммы необязательно, можно выбрать другой подход, более подходящий к конкретному собеседованию. Однако, есть преимущества такого подхода:
+- **Time management**: рисование вида с большой высоты выполняется быстро и дает непосредственные темы для дальнейшего обсуждения.
+- **Модульность**: каждый высокоуровневый компонент потенциально может быть изолирован в отдельном модуле, что позволяет команде инженеров работать над проектом одновременно
+- Этот подход широко используется для проектирования backend систем и очень похож на [C4 model for visualising software architecture](https://c4model.com/).
 
-#### What drawing tool should I use?
-At the time of this writing - [Excalidraw](https://excalidraw.com/), [Google Jamboard](https://jamboard.google.com/), and [Google Drawings](https://docs.google.com/drawings) could be the most popular choice. Some interviewers would skip diagramming altogether and prefer a collaborative editor and a verbal discussion. Due to privacy issues, some companies would not let the candidate share the screen and use a tool of personal choice.
+*Не уверены, нужно ли рисовать*? Спросите своего интервьюера, нужно ли рисовать высокоуровневую диаграмму или можно пропустить ее и перейти к каким-то конкретным компонентам.
 
-## API Design
-The goal is to cover as much ground as possible - you won't have enough time to cover every API call - just ask the interviewer if they are particulary interested in a specific part, or choose something you know best (in case they don't have a strong preference).
-### Real-time notification
-We need to provide real-time notifications support as a part of the design. Bellow are some of the approaches you can mention during the discussion:
+## Детальное погружение в фичу ленты твитов
+После обсуждения высокоуровневой архитектуры будет обсуждаться конкретный компонент системы. Предположим, это конкретная фича списка твитов. Вещи, о которых вы, возможно, захотите поговорить:
+- **архитектурные паттерны слоя представления**: MV*, лучше выбрать хорошо известный вам паттерн, поскольку это облегчает привлечение новых сотрудников;
+- **пагинация** для функциональности бесконечной загрузки, см. этот раздел ниже.
+- **чистая архитектура** для переиспользуемости бизнес-логики
+- **коммуникация с другими фичами**: использование сущностей других модулей внутри вашего модуля, например аналитили, библиотеки для загрузки картинок;
+- **single source of truth**: для избавления от неконсистентности данных и поддержки оффлайн режима;
+- **mappers**: расположение по слоям.
+
+
+![Details Diagram](images/twitter-details2.png)
+### Компоненты
+- **TweetsScreen**: UI фичи, может быть построен как на Activity, Fragments, Compose, UI Kit, SwiftUI — подход не так важен.
+- **TweetsViewModel**: сущность, работающая с состоянием UI, может быть выбьран любой другой подход — MVP, MVI, TEA, etc.
+- **Mappers**: мапперы из DTO в Entity, из Entity в UI State.
+- **AnalyticsUseCase**, **ImageLoader** API: зависимости из внешних модулей или библиотек.
+- **TweetsUseCase, TweetsEntity**: Ключевые сущности бизнес-логики, предполагают переиспользование и полную независимость.
+- **TweetsRepository** & **TweetsRepositoryImpl**: интерфейс репозитория выступает как сущность бизнес-логики, имплементация — сущность data слоя и SSOT. См. дисклеймер по реализации чистой архитектуры.
+- **RemoteDataSource**, **REST**, **WebSocket**: сущности для работы с бэкендом. Конкретный выбор будет обоснован ниже.
+- **LocalDataSource**, **Database**: сущности для кэширования данных. Конкретный выбор будет обоснован ниже.
+
+### На что обращают внимание
+- кандидат знаком с наиболее распространенными шаблонами MVx;
+- кандидат добивается четкого разделения между бизнес-логикой и пользовательским интерфейсом;
+- кандидат знаком с методами внедрения зависимостей;
+- кандидат способен проектировать автономные изолированные модули.
+
+### Часто задаваемые вопросы
+#### Как глубоко нужно погружаться?
+Здесь нет эмпирического правила. Работайте в тесном контакте с интервьюером: спросите его, нужно ли вам углубиться или перейти к следующей теме. Если у вас видеоинтервью - следите за выражением его лица. Например, если вы видите, что интервьюер хочет вас прервать - прекратите говорить и спросите, есть ли у него какие-либо вопросы. Весь смысл в совместной работе - это хороший сигнал для вас как командного игрока / сотрудника.
+#### Почему не упоминаются конкретные классы (например, RecyclerView или UICollectionView) или библиотеки (например, Room, CoreData, Realm и другие)?
+- чтобы сделать руководство стабильным и не зависящим от платформы: библиотеки и фреймворки постоянно развиваются - выбор конкретного инструмента может быть актуален только в течение короткого периода времени. Использование абстракции более надежно, поскольку вы концентрируетесь только на функциональности, которую она предоставляет, не слишком углубляясь в детали реализации;
+- выбор библиотек является предвзятым и зависит от личного опыта и текущих тенденций;
+- биг тех компании обычно пишут свои решения;
+- в Интернете уже есть масса подробностей, касающихся конкретных реализаций;
+
+#### Какой инструмент рисования использовать?
+На момент написания этой статьи наиболее популярными могли бы быть [Excalidraw](https://excalidraw.com/), [Google Jamboard](https://jamboard.google.com/), [Miro](https://miro.com). Некоторые интервьюеры вообще отказались бы от составления диаграмм и предпочли бы совместную работу редактора и устное обсуждение. Из-за проблем с конфиденциальностью некоторые компании не разрешают кандидату пользоваться экраном и использовать инструмент по личному выбору.
+
+## Проектирования Backend API
+Цель состоит в том, чтобы охватить как можно больше информации - у вас не будет достаточно времени, чтобы охватить каждый вызов API - просто спросите интервьюера, интересует ли его конкретная часть, или выберите то, что вы знаете лучше всего (в случае, если у компании нет сильных предпочтений).
+### Real-time
+Нам необходимо обеспечить поддержку уведомлений в режиме реального времени как часть дизайна. Ниже приведены некоторые из подходов, которые можно упомянуть в ходе обсуждения:
 - **Push Notifications**:
-  - pros:
-    - easier to implement compared to a dedicated service.
-    - can wake the app in the background.
-  - cons:
-    - not 100% reliable.
-    - may take up to a minute to arrive.
-    - relies on a 3rd-party service.
-    - users can opt out easily.
-- **HTTP-polling**  
-Polling requires the client to periodically ask the server for updates. The biggest concern is the amount of unnecessary network traffic and increased backend load.
-  - **short polling**: the client samples the server with a predefined time interval.    
-    - pros:
-      - simple and not as expensive (if the time between requests is long).
-      - no need to keep a persistent connection.
-    - cons:
-      - the notification can be delayed for as long as the polling time interval.
-      - additional overhead due to TLS Handshake and HTTP-headers 
+  - плюсы:
+    - сервисы предоставляют решение из коробки;
+    - можно "пробудить" приложение в фоне.
+  - минусы:
+    - не на 100% надежен;
+    - получение может занимать неограниченное количество времени;
+    - зависимость на сторонние сервисы;
+    - пользователи могут отключить получение.
+- **HTTP-polling** Polling требует, чтобы клиент периодически запрашивал у сервера обновления. Наибольшую озабоченность вызывает объем ненужного сетевого трафика и повышенная нагрузка на серверную часть.
+  - **short polling**: клиент запрашивает данные с сервера с заранее определенным интервалом времени.
+    - плюсы:
+      - просто и не так дорого (если время между запросами большое).
+      - не нужно держать постоянное соединение
+    - минусы:
+      - иммитация real-time;
+      - дополнительные расходы на TLS Handshake и HTTP-headers
   - **long polling**:
-     - pros:
-       - instant notification (no additional delay).
-     - cons:
-       - more complex and requires more server-side resources.
-       - keeps a persistent connection until the server replies.
-- **Server-Sent Events**  
-Allows the client to stream events over an HTTP connection without polling.
-  - pros:
-    - real-time traffic using a single connection.
-  - cons:
-    - keeps a persistent connection.
-- **Web-Sockets**:  
-Provide a bi-directional communication between client and server.
-  - pros:
-    - can transmit both binary and text data.
-  - cons:
-    - more complex to set-up compared to Polling/SSE.
-    - keeps a persistent connection.
+    - плюсы:
+      - мгновенное уведомление (без дополнительной задержки).
+    - минусы:
+      - более сложный и требующий больше серверных ресурсов.
+      - сохраняет постоянное соединение до тех пор, пока сервер не ответит.
+- **Server-Sent Events** Позволяет клиенту передавать события по HTTP-соединению без polling'a.
+  - плюсы:
+    - real-time трафик с использованием одного соединения.
+  - минусы:
+    - держит постоянное соединение.
+- **Web-Sockets**:    
+  Обеспечьте двунаправленную связь между клиентом и сервером.
+  - плюсы:
+    - может передавать как двоичные, так и текстовые данные.
+  - минусы:
+    - более сложный в настройке по сравнению с Polling/SSE.
+    - держит постоянное соединение.
 
-The interviewer would expect you to **pick a concrete approach** most suitable for the design task at hand. One possible solution for the "Design Twitter Feed" question could be using a combination of SSE (a primary channel of receiving real-time updates on "likes") with Push Notifications (sent if the client does not have an active connection to the backend).
+Интервьюер ожидает, что в итоге вы выберете **конкретный подход**, наиболее подходящий для текущей задачи проектирования. Одним из возможных решений дизайна твиттер ленты могло бы быть использование комбинации SSE (основного канала получения обновлений о “лайках” в режиме реального времени) с Push-уведомлениями (отправляемыми, если у клиента нет активного подключения к серверной части).
 
-### Protocols
+### Протоколы
 #### REST
-A text-based stateless protocol - most popular choice for CRUD (Create, Read, Update, and Delete) operations.
-- pros:
-  - easy to learn, understand, and implement.
-  - easy to cache using built-in HTTP caching mechanism.
-  - loose coupling between client and server.
-- cons:
-  - less efficient on mobile platforms since every request requires a separate physical connection.
-  - schemaless - it's hard to check data validity on the client.
-  - stateless - needs extra functionality to maintain a session.
-  - additional overhead - every request contains contextual metadata and headers.
+Текстовый протокол без сохранения состояния - самый популярный выбор для операций CRUD (Создание, чтение, обновление и удаление).
+- плюсы:
+  - простой в изучении, понимании и имплементации
+  - легко кэшируется с помощью встроенного механизма HTTP-кэширования.
+  - слабая связанность (coupling) между клиентом и сервером.
+- минусы:
+  - менее эффективен на мобильных платформах, поскольку для каждого запроса требуется отдельное физическое соединение.
+  - без схемы - трудно проверить достоверность данных на клиенте.
+  - без сохранения состояния - требуется дополнительная функциональность для поддержания сеанса.
+  - дополнительные накладные расходы - каждый запрос содержит контекстные метаданные и заголовки.
 
 #### GraphQL
-A query language for working with API - allows clients to request data from several resources using a single endpoint (instead of making multiple requests in traditional RESTful apps).
-- pros:
-  - schema-based typed queries - clients can verify data integrity and format.
-  - highly customizable - clients can request specific data and reduce the amount of HTTP-traffic.
-  - bi-directional communication with GraphQL Subscriptions (WebSocket based).
-- cons:
-  - more complex backend implementation.
-  - "leaky-abstraction" - clients become tightly coupled to the backend.
-  - the performance of a query is bound to the performance of the slowest service on the backend (in case the response data is federated between multiple services).
+Язык запросов для работы с API - позволяет клиентам запрашивать данные из нескольких ресурсов, используя одну конечную точку (вместо выполнения нескольких запросов в традиционных приложениях RESTful).
+- плюсы:
+  - типизированные запросы на основе схемы - клиенты могут проверять целостность и формат данных.
+  - легко настраиваемый - клиенты могут запрашивать определенные данные и уменьшать объем HTTP-трафика.
+  - двунаправленная связь с подписками GraphQL Subscriptions (на основе WebSocket).
+- минусы:
+  - более сложная серверная реализация..
+  - “протекающая абстракция” - клиенты становятся тесно связанными с серверной частью.
+  - производительность запроса привязана к производительности самого медленного сервиса на серверной части (в случае, если данные ответа объединены между несколькими сервисами/компонентами).
 
 #### WebSocket
-Full-duplex communication over a single TCP connection.
-- pros:
-  - real time bi-directional communication.
-  - provides both text-based and binary traffic.
-- cons:
-  - requires maintaining an active connection - might have poor performance on unstable cellular networks.
-  - schemaless - it's hard to check data validity on the client.
-  - the number of active connections on a single server is limited to 65k.
+Полнодуплексная связь по одному TCP-соединению.
+- плюсы:
+  - двунаправленная связь в режиме реального времени.
+  - обеспечивает как текстовый, так и двоичный трафик.
+- минусы:
+  - требует поддержания активного соединения - может привести к снижению производительности в нестабильных сетях сотовой связи.
+  - без схемы - трудно проверить достоверность данных на клиенте.
+  - количество активных подключений на одном сервере ограничено 65 тысячами.
 
-Learn more about WebSockets:
+Подробно про WebSocket'ы:
 - [WebSocket Tutorial - How WebSockets Work](https://www.youtube.com/watch?v=pNxK8fPKstc)
 
 #### gRPC
-Remote Procedure Call framework which runs on top of HTTP/2. Supports bi-directional streaming using a single physical connection.
-- pros:
-  - lightweight binary messages (much smaller compared to text-based protocols).
-  - schema-based - built-in code generation with Protobuf.
-  - provides support of event-driven architecture: server-side streaming, client-side streaming, and bi-directional streaming
-  - multiple parallel requests.
-- cons:
-  - limited browser support.
-  - non human-readable format.
-  - steeper learning curve.
+Платформа удаленного вызова процедур, которая работает поверх HTTP/2. Поддерживает двунаправленную потоковую передачу с использованием одного физического соединения.
+- плюсы:
+  - облегченные двоичные сообщения (намного меньшего размера по сравнению с текстовыми протоколами).
+  - основанная на схеме - встроенная генерация кода с помощью Protobuf.
+  - обеспечивает event-driven архитектуру: потоковая передача на стороне сервера, потоковая передача на стороне клиента и двунаправленная потоковая передача
+  - поддержка нескольких параллельных запросов.
+- минусы:
+  - ограниченная поддержка браузерами.
+  - формат, не читаемый человеком.
 
-The interviewer would expect you to **pick a concrete approach** most suitable for the design task at hand. Since the API layer for the "Design Twitter Feed" question is pretty simple and does not require much customization - we can select an approach based on REST.
+The interviewer would expect you to **pick a concrete approach** most suitable for the design task at hand. Since the API layer for the "Design Twitter Feed" question is pretty simple and does not require much customization - we can select an approach based on REST.  
+Интервьюер ожидает, что в итоге вы выберете **конкретный подход**, наиболее подходящий для текущей задачи проектирования. Поскольку дизайн API твиттера ленты довольно прост и не требует большого количества кастомизации, можно выбрать REST.
 
-### Pagination
-Endpoints that return a list of entities must support pagination. Without pagination, a single request could return a huge amount of results causing excessive network and memory usage.
-#### Types of pagination
-- **Offset Pagination**  
-Provides a `limit` and an `offset` query parameters. Example: `GET /feed?offset=100&limit=20`.
-  - pros:
-    - easiest to implement - the request parameters can be passed directly to a SQL query.
-    - stateless on the server.
-  - cons:
-    - bad performance on large offset values (the database needs to skip `offset` rows before returning the paginated result).
-    - inconsistent when adding new rows into the database (Page Drift).
-- **Keyset Pagination**  
-Uses the values from the last page to fetch the next set of items. Example: `GET /feed?after=2021-05-25T00:00:00&limit=20`.
-  - pros:
-    - translates easily into a SQL query.
-    - good performance with large datasets.
-    - stateless on the server.
-  - cons:
-    - "leaky abstraction" - the pagination mechanism becomes aware of the underlying database storage.
-    - only works on fields with natural ordering (timestamps, etc).
-- **Cursor/Seek Pagination**  
-Operates with stable ids which are decoupled from the database SQL queries (usually, a selected field is encoded using base64 and encrypted on the backend side). Example: `GET /feed?after_id=t1234xzy&limit=20`.
-  - pros:
-    - decouples pagination from SQL database.
-    - consistent ordering when new items are inserted.
-  - cons:
-    - more complex backend implementation.
-    - does not work well if items get deleted (ids might become invalid).
+### Пагинация
+Эндпоинты, возвращающие список объектов, должны поддерживать постраничную загрузку. Без пагинации один запрос может вернуть огромное количество результатов, что приведет к чрезмерному использованию сети и памяти.
+#### Типы пагинации
+- **Offset** Предоставляет `limit` и `offset` параметры. Пример: `GET /feed?offset=100&limit=20`.
+  - плюсы:
+    - проще всего реализовать - параметры запроса могут быть переданы непосредственно в SQL-запрос.
+    - без сохранения состояния на сервере.
+  - минусы:
+    - плохая производительность при больших значениях смещения (базе данных необходимо пропустить строки "смещения", прежде чем возвращать результат с разбивкой на страницы).
+    - несогласованное состояние при добавлении новых строк в базу данных (page drifting).
+- **Keyset** Использует значения с последней страницы для извлечения следующего набора элементов. Пример: `GET /feed?after=2021-05-25T00:00:00&limit=20`.
+  - плюсы:
+    - легко преобразуется в SQL-запрос.
+    - хорошая производительность при работе с большими наборами данных.
+    - без сохранения состояния на сервере.
+  - минусы:
+    - "протекающая абстракция" - пагинация получает информацию о базовом хранилище базы данных
+    - работает только с полями с естественным упорядочением (timestamps и т.д.).
+- **Cursor/Seek** Работает со стабильными идентификаторами, которые не связаны с SQL-запросами базы данных (обычно выбранное поле кодируется с использованием base64 и шифруется на серверной стороне). Пример: `GET /feed?after_id=t1234xzy&limit=20`.
+  - плюсы:
+    - отделяет разбиение на страницы от базы данных SQL.
+    - последовательный и корректный порядок при вставке новых элементов.
+  - минусы:
+    - более сложная серверная реализация.
+    - не работает должным образом, если элементы удаляются (идентификаторы могут стать недействительными).
 
-You need to select a single approach after listing the possible options and discussing their pros and cons. We'll pick Cursor Pagination in the scope of the "Design Twitter Feed" question. A sample API request might look like this:  
-```
-GET /v1/feed?after_id=p1234xzy&limit=20
-Authorization: Bearer <token>
-{
-  "data": {
-    "items": [
-      {
-        "id": "t123",
-        "author_id": "a123",
-        "title": "Title",
-        "description": "Description",
-        "likes": 12345,
-        "comments": 10,
-        "attachments": {
-          "media": [
-            {
-              "image_url": "https://static.cdn.com/image1234.webp",
-              "thumb_url": "https://static.cdn.com/thumb1234.webp"
-            },
-            ...
-          ]
-        },
-        "created_at": "2021-05-25T17:59:59.000Z"
-      },
-      ...
-    ]
-  },
-  "cursor": {
-    "count": 20,
-    "next_id": "p1235xzy",
-    "prev_id": null
-  }
-}
-```
-#### Additional Information
-- [Evolving API Pagination at Slack](https://slack.engineering/evolving-api-pagination-at-slack/)  
-- [Everything You Need to Know About API Pagination](https://nordicapis.com/everything-you-need-to-know-about-api-pagination/)  
+Вам нужно выбрать конкретный подход после перечисления возможных вариантов и обсуждения их плюсов и минусов. Для ленты новостей/твитов лучше всего подходит Cursor Pagination:
+```  
+GET /v1/feed?after_id=p1234xzy&limit=20  
+Authorization: Bearer <token>  
+{  
+ "data": { "items": [ { "id": "t123", "author_id": "a123", "title": "Title", "description": "Description", "likes": 12345, "comments": 10, "attachments": { "media": [ { "image_url": "https://static.cdn.com/image1234.webp", "thumb_url": "https://static.cdn.com/thumb1234.webp" }, ... ] }, "created_at": "2021-05-25T17:59:59.000Z" }, ... ] }, "cursor": { "count": 20, "next_id": "p1235xzy", "prev_id": null }}  
+```  
+#### Дополнительная информация
+- [Evolving API Pagination at Slack](https://slack.engineering/evolving-api-pagination-at-slack/)
+- [Everything You Need to Know About API Pagination](https://nordicapis.com/everything-you-need-to-know-about-api-pagination/)
 
-Although we left it out of scope, it's still beneficial to mention HTTP authentication. You can include an `Authorization` header and discuss how to properly handle `401 Unauthorized` response scenario. Also, don't forget to talk about Rate-Limiting strategies (`429 Too Many Requests`).  
-Make sure to keep it brief and simple (without unnecessary details): your primary goal during a system design interview is to provide "signal" and not to build a production ready solution.
+Хотя мы оставили это за рамками, все равно полезно упомянуть HTTP-аутентификацию. Вы можете включить заголовок авторизации и обсудить, как правильно обрабатывать сценарий ответа `401 (Unauthorized)`. Кроме того, не забудьте поговорить о стратегиях ограничения скорости (Rate-Limit) (`429 Too Many Requests`).
+Постарайтесь, чтобы это было кратко и просто (без лишних деталей): ваша основная цель во время собеседования по проектированию системы - дать понять, что вы знаете про это и будете учитывать, а не создать готовое к производству решение.
 
-### Providing the "signal"
-The interviewer might be looking for the following signals:
-- The candidate is aware of the challenges related to poor network conditions and expensive traffic.
-- The candidate is familiar with most common protocols for unidirectional and bi-directional communication.
-- The candidate is familiar with REST-full API design.
-- The candidate is familiar with authentication and security best practices.
-- The candidate is familiar with network error handling and rate-limiting.
+### На что обращают внимание
+- Кандидат осведомлен о проблемах, связанных с плохим состоянием сети и дорогим трафиком.
+- Кандидат знаком с наиболее распространенными протоколами для однонаправленной и двунаправленной связи.
+- Кандидат знаком с RESTful дизайном API.
+- Кандидат знаком с лучшими практиками аутентификации и обеспечения безопасности.
+- Кандидат знаком с обработкой сетевых ошибок и ограничением скорости.
 
 ## Data Storage
-### Data Storage Options
-Bellow are the most common options for local device data storage:
-- **Key-Value Storage (UserDefaults/SharedPreferences/Property List)**:  
-  Usually, baked by XML or binary files. Allows associating primitive data with string-based keys. Works best for simple, unstructured, non-sensitive data (settings, flags, etc).  
-  - pros:
-    - easy to use built-in API.
-  - cons:
-    - insecure (Android provides [EncryptedSharedPreferences](https://developer.android.com/reference/androidx/security/crypto/EncryptedSharedPreferences); 3rd party wrapper libraries available on iOS).
-    - not suitable for storing large data.
-    - no schema support nor ability to query data.
-    - no data migration support.
-    - poor performance.
-- **Database/ORM (sqlite/Room/Core Data/Realm/etc)**:  
-  Based on a relational database. Perfect for large amounts of structured data that needs complex querying logic.  
-  - pros:
-    - object–relational mapping support. 
-    - schema and querying support.
-    - data migration support.
-  - cons:
-    - more complex setup. 
-    - insecure (wrapper libraries available on iOS/Android).
-    - bigger memory footprint.
-- **Custom/Binary (DataStore/NSCoding/Codable/etc)**:  
-  Handles storing and loading data on a low level. Works best when you need to customize the data storage pipeline.  
-  - pros:
-    - highly customizable.
-    - performant.
-  - cons:
-    - no schema/migration support.
-    - lots of manual effort.
-- **On-Device Secure Storage (Keystore/Key Chain)**:  
-  Use OS-encrypted storage for creating/storing encryption keys and key-value data.  
-  - pros:
-    - secure (not 100% unless provided by the hardware).
-  - cons:
-    - not optimized for storing anything but encryption keys.
-    - encryption/decryption performance overhead.
-    - no schema/migration support.
-### Storage Location
-- **Internal**  
-  Sand-boxed by the app and not readable to other apps (with few exceptions).
-- **External**  
-  Publicly visible and most likely not deleted when your app is deleted.
-- **Media/Scoped**  
-  Special type of storage for media files.
-### Storage Type
-- **Documents (Automatically Backed Up)**  
-  User-generated data that cannot be easily re-generated and will be automatically backed up.
-- **Cache**  
-  Data that can be downloaded again or regenerated. Can be deleted by user to free-up space.
-- **Temp**  
-  Data that is only used temporary and should be deleted when no longer needed. 
+### Варианты
+Ниже приведены наиболее распространенные варианты хранения данных на локальном устройстве:
+- **Key-Value Storage (UserDefaults/SharedPreferences/Property List)**:    
+  Обычно обрабатывается с помощью XML или бинарных файлов. Позволяет связывать примитивные данные с ключами на основе строк. Лучше всего работает с простыми, неструктурированными, конфиденциальными данными (настройки, флаги и т.д.).
+  - плюсы:
+    - легко использовать встроенное API.
+  - минусы:
+    - небезопасно (Android предоставляет [EncryptedSharedPreferences](https://developer.android.com/reference/androidx/security/crypto/EncryptedSharedPreferences); доступны 3rd party бибилотеки на ios).
+    - не подходит для хранения больших объемов данных.
+    - нет поддержки схемы и возможности запрашивать данные.
+    - нет поддержки миграции данных.
+    - низкая производительность.
+- **Database/ORM (sqlite/Room/Core Data/Realm/etc)**:    
+  Основан на реляционной базе данных. Идеально подходит для больших объемов структурированных данных, требующих сложной логики запросов.
+  - плюсы:
+    - поддержка объектно–реляционного отображения.
+    - поддержка схемы и запросов.
+    - поддержка миграции данных.
+  - минусы:
+    - более сложная настройка.
+    - небезопасно (есть библиотеки-обертки с поддержкой шифрования на iOS/Android).
+    - больший объем памяти.
+- **Custom/Binary (DataStore/NSCoding/Codable/etc)**:    
+  Обрабатывает хранение и загрузку данных на низком уровне. Лучше всего работает, когда вам нужно настроить пайплайн хранения данных.
+  - плюсы:
+    - кастомизируемый.
+    - производителньый.
+  - минусы:
+    - нет поддержки схемы/миграции.
+    - много ручных усилий.
+- **On-Device Secure Storage (Keystore/Key Chain)**:    
+  Используйте зашифрованное операционной системой хранилище для создания/хранения ключей шифрования и данных о значении ключа.
+  - плюсы:
+    - безопасно (не на 100%, если это не предусмотрено аппаратным обеспечением).
+  - минусы:
+    - не оптимизирован для хранения чего-либо, кроме ключей шифрования.
+    - накладные расходы на производительность шифрования/дешифрования.
+    - нет поддержки схемы/миграции.
+### Расположение хранилище
+- **Внутреннее хранилище приложения**    
+  Изолирован приложением и недоступен для чтения другими приложениями (за редким исключением).
+- **Хранилище вне приложения**    
+  Общедоступный и, скорее всего, не будет удален при удалении вашего приложения.
+- **Media/Scoped**    
+  Специальный тип хранилища для медиафайлов.
+### Тип хранилища
+- **Документы (с автоматическим бэкапом)**    
+  Созданные пользователем данные, которые не могут быть легко сгенерированы повторно и будут автоматически созданы резервные копии.
+- **Кэш**    
+  Данные, которые могут быть загружены повторно или восстановлены заново. Могут быть удалены пользователем для освобождения места.
+- **Временное**    
+  Данные, которые используются только временно и должны быть удалены, когда они больше не нужны.
 
-### Best Practices
-- Store as little sensitive data as possible.
-- Use encrypted storage if you can't avoid storing sensitive data.
-- Do not allow your app storage grow uncontrollably. Make sure that cleaning up cached files won't affect app functionality.
+### Лучшие практики
+- Храните как можно меньше конфиденциальных данных.
+- Используйте зашифрованное хранилище, если вы не можете избежать хранения конфиденциальных данных.
+- Не позволяйте хранилищу приложений бесконтрольно увеличиваться. Убедитесь, что очистка кэшированных файлов не повлияет на функциональность приложения.
 
-### Approach
-You need to select a single approach after listing options and discussing their pros and cons. Don't worry about building a complete solution - just try to lay out a high-level idea without going too deep into details.  
-A possible breakdown for the "Design Twitter Feed" question might look like this:
-#### Feed Pagination Table
-Create a "feed" database table for storing paginated feed response:
-```
-item_id:        String
-author_id:      String
-title:          String
-description:    String
-likes:          Int
-comments:       Int
-attachments:    String # comma separated list
-created_at:     Date   # also used for sorting
-cursor_next_id: String # points to the next cursor page
-cursor_prev_id: String # points to the prev cursor page
-```
-- Limit the total number of entries to 500 in order to control local storage size.
+#### БД для хранения данных о твитах
+Создаем таблицу базы данных “feed” для хранения ответа и поддержки оффлайн режима:
+```  
+item_id:        String  
+author_id:      String  
+title:          String  
+description:    String  
+likes:          Int  
+comments:       Int  
+attachments:    String # список, разделенный запятыми  
+created_at:     Date   # также используется для сортировки  
+cursor_next_id: String # указывает курсором на следующую страницу
+cursor_prev_id: String # указывает на предыдущую страницу курсора 
+```  
+- Ограничьте общее количество записей до 500, чтобы контролировать размер локального хранилища.
 - Flatten attachments into a comma separated list. Alternatively, you can create an `attachments` table and join it with the `feed` table on `item_id`.
-- Explicitly store next/prev cursor id with each item to simplify paged navigation.
+- Храните вложения (attachments) в списке, разделенный запятыми. В качестве альтернативы можно создать таблицу вложений и объединить ее с таблицей `feed` по `item_id`.
+- Явно сохраняйте идентификатор курсора next/prev для каждого элемента, чтобы упростить навигацию по страницам.
 
-#### Attachments Storage
-- Store attachments as files in Internal Cached storage.
-- Use attachment URLs as cache keys.
-- Delete attachments after deleting corresponding items from the `feed` table.
-- Limit the cache size to 200-400 Mb.
+#### Хранение вложений
+- Храните вложения в виде файлов во внутреннем кэшированном хранилище.
+- Используйте URL-адреса вложений в качестве ключей кэша.
+- Удалите вложения после удаления соответствующих элементов из таблицы `feed`.
+- Ограничьте размер кэша до 200-400 Мб.
 
-A possible follow-up question might require you to handle sensitive media data (private accounts, etc). In this case, you can selectively encrypt image files with encryption keys stored in Keystore/KeyChain.
+### На что обращают внимание
+- Кандидат осведомлен о типах хранилищ, безопасности, ограничениях и совместимости.
+- Кандидат способен разработать решение для хранения данных для большинства распространенных сценариев.
 
-### Providing the "signal"
-The interviewer might be looking for the following signals:
-- The candidate is aware of mobile storage types, security, limitations, and compatibility.
-- The candidate is capable of designing a storage solution for most common scenarios.
+## Дополнительные темы
+### Основные проблемы, связанные с мобильной разработкой
+Вот список проблем, которые следует иметь в виду при обсуждении вашего решения с интервьюером:
+- **Конфиденциальность пользовательских данных** - утечка клиентских данных может нанести ущерб вашему бизнесу и репутации.
+- **Безопасность** - защитите свои продукты от reverse-engeneering'f (что более важно для Android).
+- **Новые версии операционных систем** - каждая новая версия iOS /Android может ограничивать существующую функциональность и ужесточать правила конфиденциальности.
+- **Необратимость каждого релиза** - предполагайте, что все, что вы публикуете в сторах, является окончательным и никогда не изменится. Обязательно используйте поэтапные развертывания и “feature”-флаги на стороне сервера.
+- **Performance/Стабильность**
+- **Ограниченное использование данных** - трафик сотовой сети может быть очень дорогим.
+- **Загрузка процессора** - более высокая вычислительная нагрузка приводит к более быстрому разряду батареи и перегреву устройства.
+- **Использование памяти** - более высокое использование памяти увеличивает риск того, что приложение будет закрыто в фоновом режиме.
+- **Время запуска** - выполнение слишком большого объема работы при запуске приложения ухудшает опыт пользователя.
+- **Crashes/ANRs** - выполнение слишком большого объема работы в основном потоке может привести к закрытию приложения и сбоям в пользовательском интерфейсе. Сбои приложений - основной фактор низких рейтингов магазинов.
+- **Использование геолокации**
+- Не ставьте под угрозу конфиденциальность пользователей при использовании геолокационных сервисов.
+- Предпочитайте минимально возможную точность определения местоположения. При необходимости постепенно запрашивайте повышение точности определения местоположения.
+- Предоставьте обоснование доступа к местоположению, прежде чем запрашивать разрешения.
+- **Использование 3rd-Party SDKs**
+- сторонние SDK могут привести к снижению производительности и/или серьезным сбоям в работе ([пример](https://www.bugsnag.com/blog/sdks-should-not-crash-apps)).
+  - Каждый SDK должен быть защищен feature-флагом.
+  - Новая интеграция SDK должна быть внедрена в качестве A/B-теста или поэтапного внедрения.
+  - У вас должен быть план “поддержки и обновления” для сторонних SDK на долгосрочную перспективу.
 
-## Additional topics
-### Major Concerns For Mobile Development
-Here's a list of concerns to keep in mind while discussing your solution with the interviewer:
-- **User Data Privacy** - leaking customer data can damage your business and reputation.
-- **Security** - protect your products against reverse-engineering (more important for Android).
-- **Target Platform Changes** - each new iOS/Android release may limit an existing functionality and make Privacy rules more strict.
-- **Non-reversibility of released products** - assume everything you ship is final and would never change. Make sure to use staged rollouts and server-side "feature" flags.
-- **Performance/Stability**
-  - Metered data usage - cellular network traffic can be very expensive.
-  - Bandwidth usage - constant waking up of the cellular radio results in a faster battery drain.
-  - CPU usage - higher computational load results in a faster battery drain and device overheating.
-  - Memory Usage - higher memory usage increases the risk of the app being killed in the background.
-  - Startup Time - doing too much work at the app start creates a poor user experience.
-  - Crashers/ANRs - doing too much work on the main thread can lead to app shutdowns and UI-jank. App crashes is the leading factor of poor store ratings. 
-- **Geo-Location Usage**
-  - Don't compromise user privacy while using location services.  
-  - Prefer the lowest possible location accuracy. Progressively ask for increased location accuracy if needed.  
-  - Provide location access rationale before requesting permissions.  
-- **3rd-Party SDKs Usage**  
-  - 3rd-Party SDKs might cause performance regressions and/or serious outages ([example](https://www.bugsnag.com/blog/sdks-should-not-crash-apps)).  
-  - Each SDK should be guarded by a feature flag.
-  - A new SDK integration should be introduced as an A/B test or a staged rollout.  
-  - You need to have a "support and upgrade" plan for the 3rd-party SDKs in a long term.
+### Конфиденциальность и безопасность
+- Храните как можно меньше пользовательских данных - не собирайте то, что вам не понадобится.
+  - Избегайте сбора идентификаторов устройств (предпочитайте одноразовые псевдоанонимные идентификаторы).
+  -   Анонимизируйте собранные данные.
+- Сведите к минимуму использование пермишенов
+  - Будьте готовы к тому, что пользователь откажет в разрешениях, и уважайте выбор пользователя, когда он откажет в разрешении во второй раз.
+  - Будьте готовы к тому, что система автоматически сбросит разрешения.
+  - Будьте готовы к переходу неиспользуемых приложений в спящий режим.
+  - Делегируйте функциональность сторонним приложениям на устройстве (камера, средство выбора фотографий, файловый менеджер и т.д.).
+- Предполагайте, что хранилище на устройстве небезопасно (даже при использовании Keystore/Keychain).
+- Предполагайте, что серверное хранилище также небезопасно - обсуждались возможные механизмы сквозного шифрования.
+- Предполагайте, что правила безопасности и конфиденциальности платформы (iOS/Android) изменятся - сделайте критическую функциональность управляемой с помощью feature-флагов.
+- *Восприятие* безопасности пользователем так же важно, как и применяемые меры безопасности - обязательно обсудите, как вы будете обучать своих клиентов сбору, хранению и передаче данных.
 
-### Privacy & Security
-- Keep as little of the user's data as possible - don't collect things you won't need.
-  - Avoid collecting device IDs (prefer one-time generated pseudo-anonymous IDs).
-  - Anonymize collected data.
-- Minimize the use of permissions
-  - Be prepared for the user to deny permissions and respect the user's choice when they deny permission the second time.
-  - Be prepared for the system to auto-reset permissions.
-  - Be prepared for app hibernation of unused apps.
-  - Delegate functionality to the 1st party apps (Camera, Photo Picker, File Manager, etc).
-- Assume that on-device storage is not secure (even while using KeyStore/KeyChain functionality).
-- Assume that the backend storage is also not secure - discussed possible end-to-end encryption mechanisms.
-- Assume that the target platform's (iOS/Android) Security & Privacy rules will change - make critical functionality controllable by remote "feature" flags.
-- User's _perception_ of security is as important as the implemented security measures - make sure to discuss how you would educate your customers about data collection, storage, and transmission.
+#### Работа в облаке vs работа на устройстве
+В какой-то момент во время собеседования вам, возможно, придется выбирать между запуском некоторых функций на устройстве и переносом их в облако. Выбранный вами подход окажет наибольшее влияние, когда речь заходит об ИИ на устройстве, но также может быть распространен на любой вид обработки данных.
 
-#### Cloud vs On-Device
-At some point, during the interview, you might need to choose between running some functionality on a device and moving it to a cloud. The approach you select would have the biggest impact when it comes to _On-Device AI_ but can also be extended to any kind of data processing as well.  
+**Преимущества работы в облаке:**
+- Независимость от устройства - ваши клиенты не ограничены характеристиками своих устройств.
+- Лучшее использование ресурсов клиентской системы - любые интенсивные вычисления могут выполняться на серверной части для экономии заряда батареи устройства.
+- Быстрый темп изменений - вам не нужно выпускать обновление для всех клиентов, чтобы получить доступ к желаемой функциональности.
+- Гораздо большие вычислительные ресурсы - ваш серверный сервер может автоматически масштабироваться по мере роста нагрузки.
+- Повышенная безопасность - клиентский код может быть изменен и подвергнут обратной инженерии, в то время как серверные приложения, как правило, более безопасны.
+- Упрощенная аналитика и анализ данных в автономном режиме - вы собираете все необходимые вам данные в своих центрах обработки данных.
 
-**Advantages of running things in a cloud:**
-- Device-independent - your customers are not limited by the characteristics of their devices.
-- Better usage of client system resources - any intensive computation can be executed on the backend to save the device's battery.
-- The fast pace of changes - you don't need to release an update to all the clients in order to get the desired functionality available.
-- Much bigger computational resources - your backend can autoscale as the load pressure grows.
-- Better security - the client code can be tampered and reverse engineered while the backend applications tend to be more secure.
-- Easier analytics and offline data analysis - you gather all the data you need in your data centers.
+**Преимущества работы на устройстве**
+- Лучшая конфиденциальность - данные не покидают устройство пользователя и не хранятся в облаке.
+- Функциональность в режиме реального времени - некоторые операции могут выполняться на устройстве пользователя намного быстрее, чем при отправке на серверную часть.
+- Меньше использования пропускной способности - вам не нужно отправлять данные по сети.
+- Offline функциональность - для работы клиенту не требуется постоянное сетевое подключение.
+- Меньшее использование серверной части - нагрузка распределяется между всеми клиентами и серверной частью.
 
-**Advantages of running things on a device:**
-- Better privacy - the data does not leave the user's device and is not stored on the cloud.
-- Real-time functionality - certain operations can run much faster on a user's device than being sent to a backend.
-- Lower bandwidth usage - you don't need to send data over the network.
-- Offline functionality - the client does not need a persistent network connection to operate.
-- Lower backend usage - the load is split between all the clients and the backend.  
+**Вещи, которые вы никогда не должны запускать на устройстве**
+- Создание нового “ресурса” - генерация купонов, билетов и т.д.
+- Транзакции и проверка платежа - если только это не делегировано стороннему SDK.
 
-**Things you should never run on a device:**  
-- New "resource" creation - generating coupons, tickets, etc.
-- Transactions and Payment verification - unless it's delegated to a 3rd-party SDK.
+### Offline State
+Добавление offline режима обеспечивает удобство использования приложения без подключения к сети:
+- пользователь может ставить лайки / комментировать / удалять твиты без подключения к сети.
+- пользовательский интерфейс обновляется, предполагая, что каждый запрос будет отправлен, когда сеть снова подключится к сети.
+- приложение должно отображать кэшированные результаты, когда это возможно.
+- приложение должным образом уведомляет пользователей о своем offline режиме.
+- все изменения состояния группируются и отправляются, когда сеть снова подключается к сети.
+#### Запрос на устранение дублирования
+Клиент должен убедиться, что повторная попытка выполнения того же запроса не приведет к созданию дублирующего ресурса на сервере (идемпотентность). Возможное решение может включать уникальные идентификаторы запросов, сгенерированные на стороне клиента, и дедупликацию на стороне сервера.
+#### Синхронизация локального и удаленного состояний
+Следующий вопрос может потребовать от вас надлежащего управления синхронизацией состояния на нескольких устройствах с одной и той же учетной записью. Разрешение конфликта слиянием может быть сложным. Ниже приведены несколько возможных решений.
 
-### Offline and Opportunistic State
-Adding an Offline State ensures the app's usability without a network connection:
-- user can like/comment/delete tweets without having a network connection.
-- the UI gets updated "opportunistically" assuming that each request will be sent when the network goes back online.
-- the app should display cached results when possible.
-- the app properly notifies users about its Offline State
-- all state changes are batched and sent when the network goes back online.
-#### Request de-duplication
-The client should ensure that retrying the same request won't create a duplication resource on the server (idempotence). A possible workaround could involve unique client-side generated request identifiers and server-side de-duplication.
-#### Synching Local and Remote States
-A follow-up question might require you to properly handle state synchronization across multiple devices with the same account. Merge conflict resolution could be trickly. Below are a few possible solutions.  
+**Локальное разрешение конфликтов** Локальное устройство извлекает удаленное состояние из серверной части после выхода в Интернет, объединяет его с локальным состоянием и загружает изменения.
 
-**Local Conflict Resolution**  
-A local device pulls the remote state from the backend after going online, merges it with the local state, and upload changes.  
+плюс: легко в реализации.
+минусы:
+- небезопасно - предоставляет локальному устройству полномочия над серверной частью.
+- это не решит проблему, если несколько устройств отправляют свои обновления одновременно (последнее обновление “выигрывает”).
+- любые изменения в логике слияния требуют обновления приложения.
 
-pros:  
-- easy to implement
+**Удаленное разрешение конфликтов** Локальное устройство отправляет свое локальное состояние серверной части после выхода в Интернет, получает новое состояние и перезаписывает локальное состояние.
 
-cons:  
-- insecure - gives a local device authority over the backend.
-- won't solve the problem if multiple devices send their updates simultaneously (the last update "wins").
-- any changes in merging logic requires app update.
+плюсы:
+- переносит полномочия по разрешению конфликтов на серверную часть.
+- не требует обновлений клиента.
 
-**Remote Conflict Resolution**  
-A local device sends its local state to the backend after going online, receives a new state, and overwrites the local state.  
+минусы:
+- более сложная серверная реализация.
 
-pros:  
-- moves conflict resolution authority to the backend.
-- does not require client updates.
-
-cons:  
-- more complex backend implementation.
-
-#### More Information
-- Offline functionality for Trello’s mobile applications:
+#### Узнать больше
+- Offline функциональность для мобильных приложений Trello:
   - [Airplane Mode: Enabling Trello Mobile Offline](https://tech.trello.com/sync-architecture/)
   - [Syncing Changes](https://tech.trello.com/syncing-changes/)
   - [Sync Failure Handling](https://tech.trello.com/sync-failure-handling/)
@@ -523,115 +469,116 @@ cons:
   - [Sync is a Two-Way Street](https://tech.trello.com/sync-downloads/)
   - [Displaying Sync State](https://tech.trello.com/sync-indicators/)
 ### Caching
-_TBD_
-### Quality Of Service
-To make your system more energy-efficient you can introduce the Quality Of Service classes for your network operations. The implementation is quite tricky but you can discuss it on a higher level:
-- Limit the number of concurrent network operations (4-10). The number itself may depend on the device state (battery/wall charger, WiFi/cellular, doze/standby, etc).
-- Assign a Quality Of Service class to each of your network requests:
-  - **User-critical** - should be dispatched as fast as possible: fetching the next page of data for the Tweet Feed; requesting Tweet Details.
-  - **UI-critical** - should be dispatched after User-critical requests: fetching low-res thumb images for tweets on the Feed while scrolling. Canceled if the user scrolls past the target tweet. May be delayed in case of fast scrolling.
-  - **UI-non-critical**: should be dispatched after UI-critical requests: fetching high-res images for tweets on the Feed. Canceled if the user scrolls past the target tweet. May be delayed in case of fast scrolling.
-  - **Background**: should be dispatched after all the above is finished: posting "likes", analytics.
-- Introduce a priority queue for scheduling network requests: dispatch requests in the order of their priority. Suspend low-priority requests if the max number of concurrent operations is reached and a high-priority request is scheduled.
-### Resumable Uploads
-A resumable (chunked) media upload breaks down a single upload request in three stages:
-- Upload initialization
-- Chunk bytes uploading (appending)
-- Upload finalization
+*В работе*
+### Качество продукта (QA)
+Чтобы сделать вашу систему более энергоэффективной, вы можете ввести классы качества обслуживания для ваших сетевых операций. Реализация довольно сложная, но вы можете обсудить ее на более высоком уровне:
+- Ограничить количество параллельных сетевых операций (4-10). Количество может зависеть от состояния устройства (аккумулятор/зарядка, Wi-Fi/сотовая связь, режим ожидания и т.д.).
+- Присвойте класс качества обслуживания каждому из ваших сетевых запросов:
+  - **Критически важные для пользователя** - должны быть отправлены как можно быстрее: получение следующей страницы данных для ленты твитов; запрос подробной информации о твите.
+  - **Критичный к пользовательскому интерфейсу** - должен отправляться после запросов, важных для пользователя: получение изображений с низким разрешением для твитов в ленте во время прокрутки. Отменяется, если пользователь прокручивает целевой твит. Может быть отложено в случае быстрой прокрутки.
+  - **Не критичный к пользовательскому интерфейсу**: должен отправляться после запросов, важных для пользовательского интерфейса: получение изображений высокого разрешения для твитов в ленте. Отменяется, если пользователь прокручивает целевой твит. Может быть отложено в случае быстрой прокрутки.
+  - **Фоновый**: должно быть отправлено после завершения всего вышеперечисленного: публикации “лайков”, аналитики.
+- Внедрите приоритетную очередь для планирования сетевых запросов: отправляйте запросы в порядке их приоритета. Приостанавливайте запросы с низким приоритетом, если достигнуто максимальное количество одновременных операций и запланирован запрос с высоким приоритетом.
+### Resumable Uploads (возобновляемые загрузки)
+Возобновляемая (фрагментированная) загрузка мультимедиа разбивает один запрос на загрузку на три этапа:
+- Инициализация загрузки
+- Загрузка фрагментов байтов (добавление)
+- Завершение загрузки
 
 ![Resumable-Uploads](/images/resumable-uploads.svg)
 
-**Advantages of resumable uploads:**
-- Allows you to resume interrupted data transfer operations without restarting from the beginning.  
+**Плюс подхода с resumable uploads:**
+- Позволяет возобновить прерванные операции передачи данных без перезапуска с самого начала.
 
-**Disadvantages of resumable uploads:**
-- An overhead from additional connections and metadata.  
+**Минус подхода с resumable uploads:**
+- Накладные расходы, связанные с дополнительными подключениями и метаданными.
 
-**Note:** Resumable uploads are most effective with large uploads (videos, archives) on unstable networks. For smaller files (images, texts) and stable networks, a single-request upload should be sufficient.  
+**Помните:** Resumble uploads наиболее эффективны при загрузке больших объемов (видео, архивов) в нестабильных сетях. Для файлов меньшего размера (изображений, текстов) и стабильных сетей должно быть достаточно загрузки по одному запросу.
 
-#### More Info:
-- [YouTube: Resumable Uploads](https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol)  
-- [Google Photos: Resumable Uploads](https://developers.google.com/photos/library/guides/resumable-uploads)  
-- [Google Cloud: Resumable Uploads](https://cloud.google.com/storage/docs/resumable-uploads)  
+#### Больше информации:
+- [YouTube: Resumable Uploads](https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol)
+- [Google Photos: Resumable Uploads](https://developers.google.com/photos/library/guides/resumable-uploads)
+- [Google Cloud: Resumable Uploads](https://cloud.google.com/storage/docs/resumable-uploads)
 - [Twitter: Chunked Media Upload](https://developer.twitter.com/en/docs/twitter-api/v1/media/upload-media/uploading-media/chunked-media-upload)
 
-### Prefetching
-Prefetching improves app performance by hiding the data transfer latency over slow and unreliable networks. The biggest concern while designing your prefetching solution is the increase in battery and cellular data usage.
+### Предзагрузка данных (prefetching)
+Предзагрузка повышает производительность приложения, скрывая задержку передачи данных по медленным и ненадежным сетям. Самая большая проблема при реализации предзагрузки - это увеличение расхода батареи и данных сотовой связи.
 _TBD_
-#### More Info:
+#### Больше информации:
 - [Optimize downloads for efficient network access](https://developer.android.com/training/efficient-downloads/efficient-network-access)
 - [Improving performance with background data prefetching](https://instagram-engineering.com/improving-performance-with-background-data-prefetching-b191acb39898)
 - [Informed mobile prefetching](https://dl.acm.org/doi/10.1145/2307636.2307651)
 - [Understanding prefetching and how Facebook uses prefetching](https://www.facebook.com/business/help/1514372351922333)
-## Conclusion
-There's a significant amount of randomness during a system design interview. The process and the structure can vary depending on the company and the interviewer.
-### Things you can control
-- **Your attitude** - always be friendly no matter how the interview goes. Don't be pushy and don't argue with the interviewer - this might provide a bad "signal".
-- **Your preparation** - the better your preparation is, the bigger the chance of a positive outcome. Practice mock design interviews with your peers (you can find people on [Teamblind](https://www.teamblind.com/search/mock)).
-- **Your knowledge** - the more knowledge you have, the better your chances are.
-  - Gain more experience.
-  - Study popular open source projects: [iOS](https://github.com/search?q=iOS&type=Repositories), [Android](https://github.com/search?o=desc&q=Android&s=stars&type=Repositories)
-  - Read development blogs from tech companies:
+## Заключение
+Во время собеседования по проектированию систем существует значительная доля непредсказуемости. Процесс и структура могут варьироваться в зависимости от компании и интервьюера.
+### Что вы можете контроллировать
+- **Ваше отношение** - всегда будьте дружелюбны, независимо от того, как проходит собеседование. Не будьте назойливы и не спорьте с интервьюером - вам могут поставить низкую оценку.
+- **Ваша подготовка** - чем лучше вы подготовитесь, тем больше шансов на положительный результат. Попрактикуйтесь и смотри мок собесы ([#1](https://youtu.be/OdEUqeJzrLA?si=cBRcZ3IvbR_Tjjy6), [#2](https://youtu.be/SD3N7vyJElc?si=BqprelNQKhKO7YTb), [найти людей](https://www.teamblind.com/search/mock)).
+- **Ваши знания** - чем больше у вас знаний, тем больше у вас шансов.
+  - получайте опыт.
+  - изучайте популярые open source проекты: [iOS](https://github.com/search?q=iOS&type=Repositories), [Android](https://github.com/search?o=desc&q=Android&s=stars&type=Repositories)
+  - читайте блоги разработчиков от технологических компаний::
     - [Uber](https://eng.uber.com/category/articles/mobile/)
     - Instagram: [iOS](https://instagram-engineering.com/tagged/ios), [Android](https://instagram-engineering.com/tagged/android)
     - [Trello](https://tech.trello.com/)
-  	- Meta
-  	  - [Engineering at Meta](https://engineering.fb.com/tag/mobile/)
-  	  - [Meta Tech Podcast](https://open.spotify.com/show/1NlTm7OkZmcrOPfvlqlBMz)    
     - [Square](https://code.cash.app)
     - [Dropbox](https://dropbox.tech/mobile)
     - [Reddit](https://www.redditinc.com/blog/topic/technology)
     - [Airbnb](https://medium.com/airbnb-engineering/tagged/mobile)
     - [Lyft Tech Podcast](https://podcasts.apple.com/us/podcast/lyft-mobile/id1453587931)
     - [Curated List of Blog Posts](/BLOGPOSTS.MD)
-- **Your resume** - make sure to list all your accomplishments with measurable impact.
-### Things you cannot control
-- **Your interviewer's attitude** - they might have a bad day or simply dislike you.
-- **Your competition** - sometimes there's simply a better candidate.
-- **The hiring committee** - they make a decision based on the interviewers' report and your resume.
-### Judging the outcome
-You _can influence_ the outcome but you _can't control_ it. Don't let minor setbacks determine your self-worth.
+- **Ваше резюме** - обязательно перечислите все свои достижения с измеримым эффектом.
+### Что вы не можете контроллировать
+- **Отношение вашего интервьюера** - у него может быть плохой день или вы ему просто не нравитесь.
+- **Ваш конкурент** - иногда просто есть кандидат получше.
+- **Комитет по найму** - они принимают решение на основе отчета интервьюеров и вашего резюме.
+### Оценивая результат
+You _can influence_ the outcome but you _can't control_ it. Don't let minor setbacks determine your self-worth.  
+Вы *можете повлиять на результат*, но *не можете его контролировать*. Не позволяйте неудачам определять вашу самооценку.
 
-## Frequently Asked Questions
+## Часто задаваемые вопросы
 
-### How do you know this approach works? Why is this necessary?
-- There's no guarantee that the suggested approach would work well in many cases - the structure of the system design round depends on a personal interviewer style.
-- Having a good interview plan at hand allows both the interviewer and the candidate to concentrate more on the content of the discussion and not organizational aspects of the actual round.
+### Откуда ты знаешь, что этот подход работает? Почему это важно?
+- Данный фреймворк успешно протестирован на ряде российских IT компаний, в частности: Avito и Tinkoff
+- Нет никакой гарантии, что предложенный подход будет хорошо работать во многих случаях - структура этапа проектирования системы зависит от личного стиля интервьюера.
+- Наличие под рукой хорошего плана собеседования позволяет как интервьюеру, так и кандидату больше сосредоточиться на содержании обсуждения, а не на организационных аспектах.
 
-### Can you go a bit deeper at X?
-This is not necessary since there might be lots of alternative solutions and the guide does not provide the ground truth. The implementation details should depend on the personal experience of the candidate and not on an opinionated approach of some random people from the Internet.
+### Не могли бы ты немного углубиться в X?
+В этом нет необходимости, поскольку может быть множество альтернативных решений, а руководство не содержит истины. Детали реализации должны зависеть от личного опыта кандидата, а не от самоуверенного подхода некоторых случайных людей из Интернета.
 
-### I'm an interviewer - this ruins the process for all of us: now the candidates just memorize the solutions to cheat during the interview.
-- The system design is much more broad compared to coding rounds. Learning a particular solution is not nearly enough to be successful. The interviewer can slightly tweak the requirements to make it a brand new question. 
-- It's really obvious when the candidate memorized a certain approach instead of relying on experience.
-- Learning some patterns and approaches before the interview might help the candidate to ease the stress and deliver the solution in a more clear and structured way.
+### Я интервьюер - это разрушает процесс для всех нас: теперь кандидаты просто запоминают решения, чтобы схитрить во время собеседования.
+- Проектирование систем гораздо шире по сравнению с секциями кодинга. Для успеха недостаточно изучить конкретное решение. Интервьюер может слегка изменить требования, чтобы задать совершенно другой тон собеседования.
+- Это действительно очевидно, когда кандидат запоминает определенный подход вместо того, чтобы полагаться на опыт.
+- Изучение некоторых шаблонов и подходов перед собеседованием может помочь кандидату снять стресс и предложить решение в более четкой и структурированной форме.
 
-## Additional Information
-More System Design exericses [here](/exercises)!
+## Дополнительные материалы
+Больше примеров по проектированию систем [здесь](/exercises)!
 
-### Junior, Middle, Senior, and Staff level interviews
-The system design experience would be different depending on the candidate's target level. An approximate engineering level breakdown can be found [here](https://candor.co/articles/tech-careers/google-promotions-the-real-scoop-on-leveling-up).  
+### Junior, Middle, Senior, и Staff уровни
+Опыт проектирования систем будет разным в зависимости от целевого уровня кандидата. Приблизительную разбивку инженерных уровней можно найти [здесь](https://candor.co/articles/tech-careers/google-promotions-the-real-scoop-on-leveling-up).
 
-_NOTE: There's no clear mapping between years of experience and seniority - some ranges might exist but it largely depends on the candidate's background._
+_УЧТИТЕ: Четкого соответствия между многолетним опытом и выслугой лет не существует - некоторые диапазоны могут существовать, но это во многом зависит от опыта кандидата._
 
-#### Junior engineers
-The system design round of junior engineers is optional since it's pretty unlikely they would have experience designing software systems.
+#### Junior
+Для джунов это интервью необязателено, поскольку маловероятно, что у них будет опыт проектирования программных систем.
 
-#### Middle level engineers
-The middle-level engineering design round might be heavy on the implementation side. The interviewer and the candidate would mostly talk about building a specific component using platform libraries.
+#### Middle
+Интервью для мидла может быть сложным с точки зрения реализации. Интервьюер и кандидат в основном говорят о создании конкретного компонента с использованием библиотечных средств.
 
-#### Senior level engineers
-The senior-level engineering design round could be more high-level compared to the previous levels. The interviewer and the candidate would mostly talk about multiple components and how they communicate with each other. The implementation details could be less important unless the candidate needs to make a decision that drastically affects the application performance. The candidate should also be able to select a technical stack and describe its advantages and trade-offs.
+#### Senior
+The senior-level engineering design round could be more high-level compared to the previous levels. The interviewer and the candidate would mostly talk about multiple components and how they communicate with each other. The implementation details could be less important unless the candidate needs to make a decision that drastically affects the application performance. The candidate should also be able to select a technical stack and describe its advantages and trade-offs.  
+Интервью для сеньоров может быть более высокоуровнем. Интервьюер и кандидат в основном будут говорить о нескольких компонентах и о том, как они взаимодействуют друг с другом. Детали реализации могут быть менее важны, если только кандидату не нужно принять решение, которое кардинально повлияет на производительность приложения. Кандидат также должен уметь выбирать технический стек и описывать его преимущества и компромиссы.
 
-#### Staff level engineers
-The staff-level engineering design round moves away from technical to strategic decisions. The candidate might want to discuss the target audience, available computational and human resources, expected traffic, and deadlines. Instead of thinking in terms of implementation tasks - the candidate should put business needs first. For example, being able to explain how to reduce product time-to-market; how to safely rollout and support features; how to handle OMG situations and large-scale outages. The user privacy topics and their legal implications become extremely important and should be discussed in great detail.
+#### Staff
+Для этого уровня происходит переходит от технических решений к стратегическим. Кандидат может захотеть обсудить целевую аудиторию, доступные вычислительные и человеческие ресурсы, ожидаемый трафик и сроки. Вместо того, чтобы думать о задачах внедрения, кандидат должен ставить на первое место потребности бизнеса. Например, возможность объяснить, как сократить время вывода продукта на рынок; как безопасно внедрять и поддерживать функции; как справляться с непредвиденными ситуациями и крупномасштабными отключениями. Темы конфиденциальности пользователей и их юридические последствия становятся чрезвычайно важными и должны обсуждаться очень подробно.
 
-## Looking for more content?
-### System Design Exercises
-Check out the [collection](/exercises) of mobile system design exercises.
-### Common System Design Interview Mistakes
-Check the guide [here](/common-interview-mistakes.md).
-### Mock Interviews
-Check out the mock interview [archive](https://www.youtube.com/playlist?list=PLaMN-JyH50OYAfxJEpiQTYTD-gxTf7x9d) or [sign-up](https://forms.gle/Cez2R31wqtgp3RsX9) to be a candidate yourself!
+## Ищите больше контента по теме?
+### System Design примеры
+Ознакомьтесь с [подборкой](/exercises) упражнений по проектированию мобильных систем.
+###  Распространенные ошибки на собеседовании
+Смотри гайд [здесь](/common-interview-mistakes.md).
+### Mock собеседования
+Ознакомьтесь с [архивом](https://www.youtube.com/playlist?list=PLaMN-JyH50OYAfxJEpiQTYTD-gxTf7x9d) мок собеседований или зарегистрируйтесь, чтобы стать кандидатом самостоятельно!
+Ознакомьтесь с материалами на российском портале DevGym ([#1](https://youtu.be/OdEUqeJzrLA?si=cBRcZ3IvbR_Tjjy6), [#2](https://youtu.be/SD3N7vyJElc?si=BqprelNQKhKO7YTb)).
 
-## Consider "starring" the repository to help other people discover the guide! Thank you!
+## Поставьте звездочку этому репозиторию. Спасибо!
