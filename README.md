@@ -116,7 +116,7 @@
 ![Details Diagram](images/twitter-details2.png)
 ### Компоненты
 - **TweetsScreen**: UI фичи, может быть построен как на Activity, Fragments, Compose, UI Kit, SwiftUI — подход не так важен.
-- **TweetsViewModel**: сущность, работающая с состоянием UI, может быть выбьран любой другой подход — MVP, MVI, TEA, etc.
+- **TweetsViewModel**: сущность, работающая с состоянием UI, может быть выбран любой другой подход — MVP, MVI, TEA, etc.
 - **Mappers**: мапперы из DTO в Entity, из Entity в UI State.
 - **AnalyticsUseCase**, **ImageLoader** API: зависимости из внешних модулей или библиотек.
 - **TweetsUseCase, TweetsEntity**: Ключевые сущности бизнес-логики, предполагают переиспользование и полную независимость.
@@ -232,7 +232,6 @@
   - ограниченная поддержка браузерами.
   - формат, не читаемый человеком.
 
-The interviewer would expect you to **pick a concrete approach** most suitable for the design task at hand. Since the API layer for the "Design Twitter Feed" question is pretty simple and does not require much customization - we can select an approach based on REST.  
 Интервьюер ожидает, что в итоге вы выберете **конкретный подход**, наиболее подходящий для текущей задачи проектирования. Поскольку дизайн API твиттера ленты довольно прост и не требует большого количества кастомизации, можно выбрать REST.
 
 ### Пагинация
@@ -356,7 +355,6 @@ cursor_next_id: String # указывает курсором на следующ
 cursor_prev_id: String # указывает на предыдущую страницу курсора 
 ```  
 - Ограничьте общее количество записей до 500, чтобы контролировать размер локального хранилища.
-- Flatten attachments into a comma separated list. Alternatively, you can create an `attachments` table and join it with the `feed` table on `item_id`.
 - Храните вложения (attachments) в списке, разделенный запятыми. В качестве альтернативы можно создать таблицу вложений и объединить ее с таблицей `feed` по `item_id`.
 - Явно сохраняйте идентификатор курсора next/prev для каждого элемента, чтобы упростить навигацию по страницам.
 
@@ -374,7 +372,7 @@ cursor_prev_id: String # указывает на предыдущую стран
 ### Основные проблемы, связанные с мобильной разработкой
 Вот список проблем, которые следует иметь в виду при обсуждении вашего решения с интервьюером:
 - **Конфиденциальность пользовательских данных** - утечка клиентских данных может нанести ущерб вашему бизнесу и репутации.
-- **Безопасность** - защитите свои продукты от reverse-engeneering'f (что более важно для Android).
+- **Безопасность** - защитите свои продукты от reverse-engeneering'а (что более важно для Android).
 - **Новые версии операционных систем** - каждая новая версия iOS /Android может ограничивать существующую функциональность и ужесточать правила конфиденциальности.
 - **Необратимость каждого релиза** - предполагайте, что все, что вы публикуете в сторах, является окончательным и никогда не изменится. Обязательно используйте поэтапные развертывания и “feature”-флаги на стороне сервера.
 - **Performance/Стабильность**
@@ -532,7 +530,6 @@ _TBD_
 - **Ваш конкурент** - иногда просто есть кандидат получше.
 - **Комитет по найму** - они принимают решение на основе отчета интервьюеров и вашего резюме.
 ### Оценивая результат
-You _can influence_ the outcome but you _can't control_ it. Don't let minor setbacks determine your self-worth.  
 Вы *можете повлиять на результат*, но *не можете его контролировать*. Не позволяйте неудачам определять вашу самооценку.
 
 ## Часто задаваемые вопросы
@@ -565,7 +562,6 @@ _УЧТИТЕ: Четкого соответствия между многоле
 Интервью для мидла может быть сложным с точки зрения реализации. Интервьюер и кандидат в основном говорят о создании конкретного компонента с использованием библиотечных средств.
 
 #### Senior
-The senior-level engineering design round could be more high-level compared to the previous levels. The interviewer and the candidate would mostly talk about multiple components and how they communicate with each other. The implementation details could be less important unless the candidate needs to make a decision that drastically affects the application performance. The candidate should also be able to select a technical stack and describe its advantages and trade-offs.  
 Интервью для сеньоров может быть более высокоуровнем. Интервьюер и кандидат в основном будут говорить о нескольких компонентах и о том, как они взаимодействуют друг с другом. Детали реализации могут быть менее важны, если только кандидату не нужно принять решение, которое кардинально повлияет на производительность приложения. Кандидат также должен уметь выбирать технический стек и описывать его преимущества и компромиссы.
 
 #### Staff
